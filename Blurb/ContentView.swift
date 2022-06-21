@@ -15,7 +15,7 @@ import WrappingHStack
 
 struct ContentView: View {
     
-    @State var messages: [MockMessages.ChatMessageItem] = []
+    @State var messages: [MockMessages.ChatMessageItem] = MockMessages.generateMessage(kind: .Text, count: 20)
     
     // MARK: - InputBarView variables
     @State private var message = ""
