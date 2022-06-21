@@ -15,36 +15,51 @@ import WrappingHStack
 
 struct ContentView: View {
     
-    @State var messages: [MockMessages.ChatMessageItem] = MockMessages.generateMessage(kind: .Text, count: 20)
+    @State var messages: [MockMessages.ChatMessageItem] = []
+    @StateObject var locationManager = LocationManager()
+    var userLatitude: String {
+        return "\(locationManager.lastLocation?.coordinate.latitude ?? 0)"
+    }
+    
+    var userLongitude: String {
+        return "\(locationManager.lastLocation?.coordinate.longitude ?? 0)"
+    }
     
     // MARK: - InputBarView variables
     @State private var message = ""
     @State private var isEditing = false
     
     var body: some View {
-        chatView
+        VStack {
+            HStack {
+                Text("Latitude: " +  String(round(1000 * (Float(userLatitude) ?? -1.0)) / 1000))
+                Text("Longitude: " +  String(round(1000 * (Float(userLongitude) ?? -1.0)) / 1000))
+            }
+            chatView
+        }
     }
     
     private var chatView: some View {
+        // A label to show the current state of the chat
+        
         ChatView<MockMessages.ChatMessageItem, MockMessages.ChatUserItem>(messages: $messages) {
 
-            BasicInputView(
-                message: $message,
-                isEditing: $isEditing,
-                placeholder: "Type something",
-                onCommit: { messageKind in
-                    self.messages.append(
-                        .init(user: MockMessages.sender, messageKind: messageKind, isSender: true)
-                    )
-                }
-            )
-            .padding(8)
-            .padding(.bottom, isEditing ? 0 : 8)
-            .accentColor(.blue)
-            .background(Color.primary.colorInvert())
-            .animation(.linear)
-            .embedInAnyView()
-            
+        BasicInputView(
+            message: $message,
+            isEditing: $isEditing,
+            placeholder: "Type something",
+            onCommit: { messageKind in
+                self.messages.append(
+                    .init(user: MockMessages.sender, messageKind: messageKind, isSender: true)
+                )
+            }
+        )
+        .padding(8)
+        .padding(.bottom, isEditing ? 0 : 8)
+        .accentColor(.blue)
+        .background(Color.primary.colorInvert())
+        .animation(.linear)
+        .embedInAnyView()
         }
         // ▼ Optional, Present context menu when cell long pressed
         .messageCellContextMenu { message -> AnyView in

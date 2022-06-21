@@ -14,6 +14,7 @@
 		AB8AE71028616CBA00CB4F0C /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8AE70F28616CBA00CB4F0C /* Persistence.swift */; };
 		AB8AE71328616CBA00CB4F0C /* Blurb.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = AB8AE71128616CBA00CB4F0C /* Blurb.xcdatamodeld */; };
 		AB8AE71B286171E400CB4F0C /* SwiftyChat in Frameworks */ = {isa = PBXBuildFile; productRef = AB8AE71A286171E400CB4F0C /* SwiftyChat */; };
+		AB8AE71D2861794000CB4F0C /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8AE71C2861794000CB4F0C /* LocationManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		AB8AE70D28616CBA00CB4F0C /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		AB8AE70F28616CBA00CB4F0C /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		AB8AE71228616CBA00CB4F0C /* Blurb.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Blurb.xcdatamodel; sourceTree = "<group>"; };
+		AB8AE71C2861794000CB4F0C /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 				AB8AE70F28616CBA00CB4F0C /* Persistence.swift */,
 				AB8AE71128616CBA00CB4F0C /* Blurb.xcdatamodeld */,
 				AB8AE70C28616CBA00CB4F0C /* Preview Content */,
+				AB8AE71C2861794000CB4F0C /* LocationManager.swift */,
 			);
 			path = Blurb;
 			sourceTree = "<group>";
@@ -153,6 +156,7 @@
 			files = (
 				AB8AE71028616CBA00CB4F0C /* Persistence.swift in Sources */,
 				AB8AE71328616CBA00CB4F0C /* Blurb.xcdatamodeld in Sources */,
+				AB8AE71D2861794000CB4F0C /* LocationManager.swift in Sources */,
 				AB8AE70928616CB900CB4F0C /* ContentView.swift in Sources */,
 				AB8AE70728616CB900CB4F0C /* BlurbApp.swift in Sources */,
 			);
@@ -286,6 +290,7 @@
 				DEVELOPMENT_TEAM = T5XR9DZVW2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show chats near you";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -315,6 +320,7 @@
 				DEVELOPMENT_TEAM = T5XR9DZVW2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show chats near you";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
