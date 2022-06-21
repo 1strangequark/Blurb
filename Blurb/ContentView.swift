@@ -1,88 +1,77 @@
 //
-//  ContentView.swift
-//  Blurb
+//  BasicExampleView.swift
+//  SwiftyChatExample
 //
-//  Created by Jonathan Davies on 6/20/22.
+//  Created by Enes Karaosman on 21.10.2020.
 //
 
 import SwiftUI
-import CoreData
+import SwiftyChat
+import GSPlayer
+import Kingfisher
+import SwiftUIEKtensions
+import VideoPlayer
+import WrappingHStack
 
 struct ContentView: View {
-    @Environment(\.managedObjectContext) private var viewContext
-
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
-        animation: .default)
-    private var items: FetchedResults<Item>
-
+    
+    @State var messages: [MockMessages.ChatMessageItem] = []
+    
+    // MARK: - InputBarView variables
+    @State private var message = ""
+    @State private var isEditing = false
+    
     var body: some View {
-        NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-            Text("Select an item")
-        }
+        chatView
     }
+    
+    private var chatView: some View {
+        ChatView<MockMessages.ChatMessageItem, MockMessages.ChatUserItem>(messages: $messages) {
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            BasicInputView(
+                message: $message,
+                isEditing: $isEditing,
+                placeholder: "Type something",
+                onCommit: { messageKind in
+                    self.messages.append(
+                        .init(user: MockMessages.sender, messageKind: messageKind, isSender: true)
+                    )
+                }
+            )
+            .padding(8)
+            .padding(.bottom, isEditing ? 0 : 8)
+            .accentColor(.blue)
+            .background(Color.primary.colorInvert())
+            .animation(.linear)
+            .embedInAnyView()
+            
+        }
+        // ▼ Optional, Present context menu when cell long pressed
+        .messageCellContextMenu { message -> AnyView in
+            switch message.messageKind {
+            case .text(let text):
+                return Button(action: {
+                    print("Copy Context Menu tapped!!")
+                    UIPasteboard.general.string = text
+                }) {
+                    Text("Copy")
+                    Image(systemName: "doc.on.doc")
+                }.embedInAnyView()
+            default:
+                // If you don't want to implement contextMenu action
+                // for a specific case, simply return EmptyView like below;
+                return EmptyView().embedInAnyView()
             }
         }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
+        // ▼ Required
+        .environmentObject(ChatMessageCellStyle.init())
+        .navigationBarTitle("Basic")
+        .listStyle(PlainListStyle())
     }
 }
 
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
-
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        ContentView()
     }
 }

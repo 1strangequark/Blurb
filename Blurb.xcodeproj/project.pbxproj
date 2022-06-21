@@ -13,6 +13,7 @@
 		AB8AE70E28616CBA00CB4F0C /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AB8AE70D28616CBA00CB4F0C /* Preview Assets.xcassets */; };
 		AB8AE71028616CBA00CB4F0C /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8AE70F28616CBA00CB4F0C /* Persistence.swift */; };
 		AB8AE71328616CBA00CB4F0C /* Blurb.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = AB8AE71128616CBA00CB4F0C /* Blurb.xcdatamodeld */; };
+		AB8AE71B286171E400CB4F0C /* SwiftyChat in Frameworks */ = {isa = PBXBuildFile; productRef = AB8AE71A286171E400CB4F0C /* SwiftyChat */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AB8AE71B286171E400CB4F0C /* SwiftyChat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,6 +91,9 @@
 			dependencies = (
 			);
 			name = Blurb;
+			packageProductDependencies = (
+				AB8AE71A286171E400CB4F0C /* SwiftyChat */,
+			);
 			productName = Blurb;
 			productReference = AB8AE70328616CB900CB4F0C /* Blurb.app */;
 			productType = "com.apple.product-type.application";
@@ -117,6 +122,9 @@
 				Base,
 			);
 			mainGroup = AB8AE6FA28616CB900CB4F0C;
+			packageReferences = (
+				AB8AE719286171E400CB4F0C /* XCRemoteSwiftPackageReference "SwiftyChat" */,
+			);
 			productRefGroup = AB8AE70428616CB900CB4F0C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -347,6 +355,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AB8AE719286171E400CB4F0C /* XCRemoteSwiftPackageReference "SwiftyChat" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/EnesKaraosman/SwiftyChat.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AB8AE71A286171E400CB4F0C /* SwiftyChat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AB8AE719286171E400CB4F0C /* XCRemoteSwiftPackageReference "SwiftyChat" */;
+			productName = SwiftyChat;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		AB8AE71128616CBA00CB4F0C /* Blurb.xcdatamodeld */ = {
