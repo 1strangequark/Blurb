@@ -13,12 +13,8 @@ struct ContentView: View {
     
     @State var messages: [MockMessages.ChatMessageItem] = []
     @StateObject var locationManager = LocationManager()
-    var userLatitude: String {
-        return "\(locationManager.lastLocation?.coordinate.latitude ?? 0)"
-    }
-    var userLongitude: String {
-        return "\(locationManager.lastLocation?.coordinate.longitude ?? 0)"
-    }
+    @State private var hasLoaded = false
+    @State private var userID: String = ""
     
     private let database = CKContainer(identifier: "iCloud.Blurb").publicCloudDatabase
 
@@ -72,16 +68,12 @@ struct ContentView: View {
     // MARK: - InputBarView variables
     @State private var message = ""
     @State private var isEditing = false
-
-    @State private var hasLoaded = false
-
-    @State private var userID: String = ""
     
     var body: some View {
         VStack {
             HStack {
-                Text("Latitude: " +  String(round(1000 * (Float(userLatitude) ?? -1.0)) / 1000))
-                Text("Longitude: " +  String(round(1000 * (Float(userLongitude) ?? -1.0)) / 1000))
+                Text("Latitude: " +  String(round(1000 * (Float("\(locationManager.lastLocation?.coordinate.latitude ?? 0)") ?? -1.0)) / 1000))
+                Text("Longitude: " +  String(round(1000 * (Float("\(locationManager.lastLocation?.coordinate.longitude ?? 0)") ?? -1.0)) / 1000))
             }
             chatView
         }
@@ -89,6 +81,14 @@ struct ContentView: View {
             if !hasLoaded {
                 hasLoaded = true
                 fetchItems()
+            }
+        }
+        .onAppear {
+            // Create a unique user id and store in UserDefaults
+            userID = UserDefaults.standard.string(forKey: "userId") ?? ""
+            if userID == "" {
+                let userId = UUID().uuidString
+                UserDefaults.standard.set(userId, forKey: "userId")
             }
         }
     }
