@@ -7,11 +7,7 @@
 
 import SwiftUI
 import SwiftyChat
-import GSPlayer
-import Kingfisher
-import SwiftUIEKtensions
-import VideoPlayer
-import WrappingHStack
+import CloudKit
 
 struct ContentView: View {
     
@@ -20,14 +16,66 @@ struct ContentView: View {
     var userLatitude: String {
         return "\(locationManager.lastLocation?.coordinate.latitude ?? 0)"
     }
-    
     var userLongitude: String {
         return "\(locationManager.lastLocation?.coordinate.longitude ?? 0)"
+    }
+    
+    private let database = CKContainer(identifier: "iCloud.Blurb").publicCloudDatabase
+
+    func fetchItems() {
+        let location = locationManager.lastLocation!
+        let radiusInKilometers:CGFloat = 1;
+        let predicate: NSPredicate = NSPredicate(format: "distanceToLocation:fromLocation:(location, %@) < %f", location, radiusInKilometers)
+        let query = CKQuery(recordType: "Post", predicate: predicate)
+        // fetch from the database
+        database.perform(query, inZoneWith: nil) { (records, error) in
+            if let error = error {
+                print(error.localizedDescription)
+            } else {
+                guard let records = records else {
+                    print("Error: Unable to load records!")
+                    return
+                }
+                // update the messages array with the fetched records
+                self.messages = records.compactMap { MockMessages.ChatMessageItem.init(user: MockMessages.ChatUserItem.init(userName: "anonymous"), messageKind: ChatMessageKind.text($0["text"] as? String ?? "(Unable to load)")) }
+            }
+        }
+    }
+
+    // A function which takes a string and outputs what is between the parentheses
+    func getStringBetweenParentheses(string: String) -> String {
+        let regex = try! NSRegularExpression(pattern: "\\((.*?)\\)", options: [])
+        let range = NSRange(location: 0, length: string.count)
+        let matches = regex.matches(in: string, options: [], range: range)
+        if let match = matches.first {
+            return (string as NSString).substring(with: match.range(at: 1))
+        }
+        return ""
+    }
+
+    func saveItem(message: ChatMessageKind) {
+        var messageText = String(message.description)
+        messageText = getStringBetweenParentheses(string: messageText)
+        let record = CKRecord(recordType: "Post")
+        record.setValue(messageText, forKey: "text")
+        record.setObject(CLLocation(latitude: locationManager.lastLocation?.coordinate.latitude ?? 0, longitude: locationManager.lastLocation?.coordinate.longitude ?? 0), forKey: "location")
+        // Save to the database
+        database.save(record) { (record, error) in
+            if let error = error {
+                print(error.localizedDescription)
+            } else {
+                print("Record saved successfully")
+            }
+        }
     }
     
     // MARK: - InputBarView variables
     @State private var message = ""
     @State private var isEditing = false
+
+    @State private var hasLoaded = false
+
+    @State private var userID: String = ""
     
     var body: some View {
         VStack {
@@ -36,6 +84,12 @@ struct ContentView: View {
                 Text("Longitude: " +  String(round(1000 * (Float(userLongitude) ?? -1.0)) / 1000))
             }
             chatView
+        }
+        .onChange(of: locationManager.lastLocation) { _ in
+            if !hasLoaded {
+                hasLoaded = true
+                fetchItems()
+            }
         }
     }
     
@@ -52,6 +106,8 @@ struct ContentView: View {
                 self.messages.append(
                     .init(user: MockMessages.sender, messageKind: messageKind, isSender: true)
                 )
+                // Convert CustomStringConvertible to String
+                self.saveItem(message: messageKind)
             }
         )
         .padding(8)

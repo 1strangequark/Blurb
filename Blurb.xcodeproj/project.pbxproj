@@ -15,6 +15,7 @@
 		AB8AE71328616CBA00CB4F0C /* Blurb.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = AB8AE71128616CBA00CB4F0C /* Blurb.xcdatamodeld */; };
 		AB8AE71B286171E400CB4F0C /* SwiftyChat in Frameworks */ = {isa = PBXBuildFile; productRef = AB8AE71A286171E400CB4F0C /* SwiftyChat */; };
 		AB8AE71D2861794000CB4F0C /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8AE71C2861794000CB4F0C /* LocationManager.swift */; };
+		AB8AE7422861880F00CB4F0C /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB8AE7412861880F00CB4F0C /* CloudKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,10 @@
 		AB8AE70F28616CBA00CB4F0C /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		AB8AE71228616CBA00CB4F0C /* Blurb.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Blurb.xcdatamodel; sourceTree = "<group>"; };
 		AB8AE71C2861794000CB4F0C /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		AB8AE73F2861880C00CB4F0C /* BlurbDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BlurbDebug.entitlements; sourceTree = "<group>"; };
+		AB8AE7412861880F00CB4F0C /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
+		AB8AE7432861885E00CB4F0C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		AB8AE74428639A5F00CB4F0C /* Blurb.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Blurb.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -34,6 +39,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AB8AE71B286171E400CB4F0C /* SwiftyChat in Frameworks */,
+				AB8AE7422861880F00CB4F0C /* CloudKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -45,6 +51,7 @@
 			children = (
 				AB8AE70528616CB900CB4F0C /* Blurb */,
 				AB8AE70428616CB900CB4F0C /* Products */,
+				AB8AE7402861880F00CB4F0C /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -59,6 +66,9 @@
 		AB8AE70528616CB900CB4F0C /* Blurb */ = {
 			isa = PBXGroup;
 			children = (
+				AB8AE74428639A5F00CB4F0C /* Blurb.entitlements */,
+				AB8AE7432861885E00CB4F0C /* Info.plist */,
+				AB8AE73F2861880C00CB4F0C /* BlurbDebug.entitlements */,
 				AB8AE70628616CB900CB4F0C /* BlurbApp.swift */,
 				AB8AE70828616CB900CB4F0C /* ContentView.swift */,
 				AB8AE70A28616CBA00CB4F0C /* Assets.xcassets */,
@@ -76,6 +86,14 @@
 				AB8AE70D28616CBA00CB4F0C /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		AB8AE7402861880F00CB4F0C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				AB8AE7412861880F00CB4F0C /* CloudKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -284,12 +302,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Blurb/BlurbDebug.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Blurb/Preview Content\"";
 				DEVELOPMENT_TEAM = T5XR9DZVW2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Blurb/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show chats near you";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -303,6 +323,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = jonathandaviesipad.Blurb;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -314,12 +335,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Blurb/Blurb.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Blurb/Preview Content\"";
 				DEVELOPMENT_TEAM = T5XR9DZVW2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Blurb/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show chats near you";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -333,6 +356,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = jonathandaviesipad.Blurb;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
