@@ -8,13 +8,15 @@
 import SwiftUI
 import SwiftyChat
 import CloudKit
+import MapKit
+import CoreLocation
 
 struct ContentView: View {
     
     @State var messages: [MockMessages.ChatMessageItem] = []
     @StateObject var locationManager = LocationManager()
     @State private var hasLoaded = false
-    @State private var userID: String = ""
+    @State var userID: String = ""
     
     private let database = CKContainer(identifier: "iCloud.Blurb").publicCloudDatabase
 
@@ -33,7 +35,20 @@ struct ContentView: View {
                     return
                 }
                 // update the messages array with the fetched records
-                self.messages = records.compactMap { MockMessages.ChatMessageItem.init(user: MockMessages.ChatUserItem.init(userName: "anonymous"), messageKind: ChatMessageKind.text($0["text"] as? String ?? "(Unable to load)")) }
+                self.messages = records.compactMap { 
+                    MockMessages.ChatMessageItem.init(
+                        user: MockMessages.ChatUserItem.init(userName: $0["userID"] as? String ?? "(Unable to load)"),
+                        messageKind: ChatMessageKind.text($0["text"] as? String ?? "(Unable to load)"),
+                        isSender: ($0["userID"] as? String ?? "(Unable to load)") == self.userID,
+                        date: $0["timestamp"] as? Date ?? Date()
+                    ) 
+                }
+                for record in records {
+                    let location = record["location"] as? CLLocation ?? CLLocation()
+                    markers.append(contentsOf: [Marker(location: MapMarker(coordinate: location.coordinate, tint: .orange), name: "Test Marker")])
+                }
+                // sort the records by date
+                self.messages = self.messages.sorted { $0.date < $1.date }
             }
         }
     }
@@ -55,6 +70,8 @@ struct ContentView: View {
         let record = CKRecord(recordType: "Post")
         record.setValue(messageText, forKey: "text")
         record.setObject(CLLocation(latitude: locationManager.lastLocation?.coordinate.latitude ?? 0, longitude: locationManager.lastLocation?.coordinate.longitude ?? 0), forKey: "location")
+        record.setValue(Date(), forKey: "timestamp")
+        record.setValue(userID, forKey: "userID")
         // Save to the database
         database.save(record) { (record, error) in
             if let error = error {
@@ -69,27 +86,43 @@ struct ContentView: View {
     @State private var message = ""
     @State private var isEditing = false
     
+    struct Marker: Identifiable {
+        let id = UUID()
+        var location: MapMarker
+        let name: String
+    }
+    @State var markers: [Marker] = []
+    
     var body: some View {
-        VStack {
-            HStack {
+        ZStack {
+            VStack {
+                Map(coordinateRegion: $locationManager.region,
+                    showsUserLocation: true,
+                    annotationItems: markers) { marker in
+                        marker.location }.edgesIgnoringSafeArea(.all)
+                chatView
+            }
+            .onChange(of: locationManager.lastLocation) { _ in
+                if !hasLoaded {
+                    hasLoaded = true
+                    fetchItems()
+                }
+            }
+            .onAppear {
+                // Create a unique user id and store in UserDefaults
+                userID = UserDefaults.standard.string(forKey: "userId") ?? ""
+                if userID == "" {
+                    let userId = UUID().uuidString
+                    UserDefaults.standard.set(userId, forKey: "userId")
+                }
+            }
+            VStack {
+                Text(" ")
                 Text("Latitude: " +  String(round(1000 * (Float("\(locationManager.lastLocation?.coordinate.latitude ?? 0)") ?? -1.0)) / 1000))
                 Text("Longitude: " +  String(round(1000 * (Float("\(locationManager.lastLocation?.coordinate.longitude ?? 0)") ?? -1.0)) / 1000))
+                Spacer()
             }
-            chatView
-        }
-        .onChange(of: locationManager.lastLocation) { _ in
-            if !hasLoaded {
-                hasLoaded = true
-                fetchItems()
-            }
-        }
-        .onAppear {
-            // Create a unique user id and store in UserDefaults
-            userID = UserDefaults.standard.string(forKey: "userId") ?? ""
-            if userID == "" {
-                let userId = UUID().uuidString
-                UserDefaults.standard.set(userId, forKey: "userId")
-            }
+            .font(.system(.largeTitle, design: .rounded))
         }
     }
     
