@@ -17,12 +17,12 @@ struct ContentView: View {
     @StateObject var locationManager = LocationManager()
     @State private var hasLoaded = false
     @State var userID: String = ""
+    let radiusInKilometers: CGFloat = 100.0
     
     private let database = CKContainer(identifier: "iCloud.Blurb").publicCloudDatabase
 
     func fetchItems() {
         let location = locationManager.lastLocation!
-        let radiusInKilometers:CGFloat = 1;
         let predicate: NSPredicate = NSPredicate(format: "distanceToLocation:fromLocation:(location, %@) < %f", location, radiusInKilometers)
         let query = CKQuery(recordType: "Post", predicate: predicate)
         // fetch from the database
@@ -35,20 +35,24 @@ struct ContentView: View {
                     return
                 }
                 // update the messages array with the fetched records
-                self.messages = records.compactMap { 
-                    MockMessages.ChatMessageItem.init(
-                        user: MockMessages.ChatUserItem.init(userName: $0["userID"] as? String ?? "(Unable to load)"),
-                        messageKind: ChatMessageKind.text($0["text"] as? String ?? "(Unable to load)"),
-                        isSender: ($0["userID"] as? String ?? "(Unable to load)") == self.userID,
-                        date: $0["timestamp"] as? Date ?? Date()
-                    ) 
-                }
-                for record in records {
-                    let location = record["location"] as? CLLocation ?? CLLocation()
-                    markers.append(contentsOf: [Marker(location: MapMarker(coordinate: location.coordinate, tint: .orange), name: "Test Marker")])
+                // if the size of messages is not equal to the size of records, then we need to update the messages array
+                if self.messages.count != records.count {
+                    self.messages = records.compactMap { 
+                        MockMessages.ChatMessageItem.init(
+                            user: MockMessages.ChatUserItem.init(userName: $0["userID"] as? String ?? "(Unable to load)"),
+                            messageKind: ChatMessageKind.text($0["text"] as? String ?? "(Unable to load)"),
+                            isSender: ($0["userID"] as? String ?? "(Unable to load)") == self.userID,
+                            date: $0["timestamp"] as? Date ?? Date()
+                        ) 
+                    }
+                    markers.removeAll()
+                    for record in records {
+                        let MarkerLocation = record["location"] as? CLLocation ?? CLLocation()
+                        markers.append(contentsOf: [Marker(location: MapMarker(coordinate: MarkerLocation.coordinate, tint: .orange), name: "\(MarkerLocation.coordinate)")])
+                    }
+                    self.messages = self.messages.sorted { $0.date < $1.date }
                 }
                 // sort the records by date
-                self.messages = self.messages.sorted { $0.date < $1.date }
             }
         }
     }
@@ -94,35 +98,41 @@ struct ContentView: View {
     @State var markers: [Marker] = []
     
     var body: some View {
-        ZStack {
-            VStack {
-                Map(coordinateRegion: $locationManager.region,
-                    showsUserLocation: true,
-                    annotationItems: markers) { marker in
-                        marker.location }.edgesIgnoringSafeArea(.all)
-                chatView
+        VStack {
+            Map(coordinateRegion: $locationManager.region,
+                showsUserLocation: true,
+                annotationItems: markers) { marker in
+                    marker.location }.edgesIgnoringSafeArea(.all)
+            ZStack {
+                // Colored background
+                Color.gray.edgesIgnoringSafeArea(.all)
+                Text("Showing posts within \(Int(radiusInKilometers))km of you")
+                .foregroundColor(Color.white)
+                .font(.headline)
+                .scaledToFit()
             }
-            .onChange(of: locationManager.lastLocation) { _ in
-                if !hasLoaded {
-                    hasLoaded = true
+            // Get Screen Size
+            .frame(height: UIScreen.main.bounds.height / 25)
+            chatView
+        }
+        .onChange(of: locationManager.lastLocation) { _ in
+            if !hasLoaded {
+                // load posts on startup if they haven't been loaded already.
+                hasLoaded = true
+                fetchItems()
+                // run every 10 seconds
+                Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { _ in
                     fetchItems()
                 }
             }
-            .onAppear {
-                // Create a unique user id and store in UserDefaults
-                userID = UserDefaults.standard.string(forKey: "userId") ?? ""
-                if userID == "" {
-                    let userId = UUID().uuidString
-                    UserDefaults.standard.set(userId, forKey: "userId")
-                }
+        }
+        .onAppear {
+            // Create a unique user id and store in UserDefaults
+            userID = UserDefaults.standard.string(forKey: "userId") ?? ""
+            if userID == "" {
+                let userId = UUID().uuidString
+                UserDefaults.standard.set(userId, forKey: "userId")
             }
-            VStack {
-                Text(" ")
-                Text("Latitude: " +  String(round(1000 * (Float("\(locationManager.lastLocation?.coordinate.latitude ?? 0)") ?? -1.0)) / 1000))
-                Text("Longitude: " +  String(round(1000 * (Float("\(locationManager.lastLocation?.coordinate.longitude ?? 0)") ?? -1.0)) / 1000))
-                Spacer()
-            }
-            .font(.system(.largeTitle, design: .rounded))
         }
     }
     
