@@ -12,12 +12,11 @@ import MapKit
 import CoreLocation
 
 struct ContentView: View {
-    
     @State var messages: [MockMessages.ChatMessageItem] = []
-    @StateObject var locationManager = LocationManager()
     @State private var hasLoaded = false
     @State var userID: String = ""
     let radiusInKilometers: CGFloat = 100.0
+    @StateObject var locationManager = LocationManager()
     
     private let database = CKContainer(identifier: "iCloud.Blurb").publicCloudDatabase
 
@@ -89,6 +88,9 @@ struct ContentView: View {
     // MARK: - InputBarView variables
     @State private var message = ""
     @State private var isEditing = false
+//    @State private var regionTwo = MKCoordinateRegion(
+//            center: ScaledAnnotationView.usersLocation,latitudinalMeters: 1000, longitudinalMeters: 1000
+//        )
     
     struct Marker: Identifiable {
         let id = UUID()
@@ -138,7 +140,6 @@ struct ContentView: View {
     
     private var chatView: some View {
         // A label to show the current state of the chat
-        
         ChatView<MockMessages.ChatMessageItem, MockMessages.ChatUserItem>(messages: $messages) {
 
         BasicInputView(
@@ -181,6 +182,49 @@ struct ContentView: View {
         .environmentObject(ChatMessageCellStyle.init())
         .navigationBarTitle("Basic")
         .listStyle(PlainListStyle())
+    }
+
+//    struct CurrentUsersAnnotation: Identifiable {
+//        let id = UUID() // Always unique on map
+//    }
+
+//    struct ScaledAnnotationView: View {
+//        let annotations = [CurrentUsersAnnotation()]
+////        static let usersLocation = CLLocationCoordinate2D(latitude: 52.0929779694589, longitude: 5.084964426384347)
+////        @State private var region = MKCoordinateRegion(
+////                center: ScaledAnnotationView.usersLocation,latitudinalMeters: 1000, longitudinalMeters: 1000
+////            )
+//        @StateObject var locationManager = LocationManager()
+//        var body: some View {
+//            //Get the size of the frame for scale
+//            GeometryReader{ geo in
+//                Map(coordinateRegion: $locationManager.region,
+//                    showsUserLocation: true,
+//                    annotationItems: markers) { marker in
+//                        marker.location }.edgesIgnoringSafeArea(.all)
+//                Map(coordinateRegion: $locationManager.region,
+//                    showsUserLocation: true,
+//                    annotationItems: markers) { marker in
+//                    MapAnnotation(coordinate: locationManager.lastLocation?.coordinate ?? CLLocationCoordinate2D()) {
+//                            //Size per kilometer or any unit, just change the converted unit.
+//                        let kilometerSize = (geo.size.height/locationManager.region.spanLatitude.converted(to: .kilometers).value)
+//                        Circle()
+//                            .fill(Color.red.opacity(0.5))
+//                        //Keep it a circle
+//                            .frame(width: kilometerSize, height: kilometerSize)
+//                    }
+//                }
+//            }
+//        }
+//    }
+}
+extension MKCoordinateRegion{
+    ///Identify the length of the span in meters north to south
+    var spanLatitude: Measurement<UnitLength>{
+        let loc1 = CLLocation(latitude: center.latitude - span.latitudeDelta * 0.5, longitude: center.longitude)
+        let loc2 = CLLocation(latitude: center.latitude + span.latitudeDelta * 0.5, longitude: center.longitude)
+        let metersInLatitude = loc1.distance(from: loc2)
+        return Measurement(value: metersInLatitude, unit: UnitLength.meters)
     }
 }
 
