@@ -15,43 +15,47 @@ struct ContentView: View {
     @State var messages: [MockMessages.ChatMessageItem] = []
     @State private var hasLoaded = false
     @State var userID: String = ""
-    let radiusInKilometers: CGFloat = 100.0
+    let radiusInMeters: CGFloat = 10000.0
     @StateObject var locationManager = LocationManager()
     
     private let database = CKContainer(identifier: "iCloud.Blurb").publicCloudDatabase
 
     func fetchItems() {
-        let location = locationManager.lastLocation!
-        let predicate: NSPredicate = NSPredicate(format: "distanceToLocation:fromLocation:(location, %@) < %f", location, radiusInKilometers)
-        let query = CKQuery(recordType: "Post", predicate: predicate)
-        // fetch from the database
-        database.perform(query, inZoneWith: nil) { (records, error) in
-            if let error = error {
-                print(error.localizedDescription)
-            } else {
-                guard let records = records else {
-                    print("Error: Unable to load records!")
-                    return
-                }
-                // update the messages array with the fetched records
-                // if the size of messages is not equal to the size of records, then we need to update the messages array
-                if self.messages.count != records.count {
-                    self.messages = records.compactMap { 
-                        MockMessages.ChatMessageItem.init(
-                            user: MockMessages.ChatUserItem.init(userName: $0["userID"] as? String ?? "(Unable to load)"),
-                            messageKind: ChatMessageKind.text($0["text"] as? String ?? "(Unable to load)"),
-                            isSender: ($0["userID"] as? String ?? "(Unable to load)") == self.userID,
-                            date: $0["timestamp"] as? Date ?? Date()
-                        ) 
+        DispatchQueue.global(qos: .userInitiated).async {
+            while (locationManager.lastLocation == nil) {
+            }
+            let location = locationManager.lastLocation!
+            let predicate: NSPredicate = NSPredicate(format: "distanceToLocation:fromLocation:(location, %@) < %f", location, radiusInMeters)
+            let query = CKQuery(recordType: "Post", predicate: predicate)
+            // fetch from the database
+            database.perform(query, inZoneWith: nil) { (records, error) in
+                if let error = error {
+                    print(error.localizedDescription)
+                } else {
+                    guard let records = records else {
+                        print("Error: Unable to load records!")
+                        return
                     }
-                    markers.removeAll()
-                    for record in records {
-                        let MarkerLocation = record["location"] as? CLLocation ?? CLLocation()
-                        markers.append(contentsOf: [Marker(location: MapMarker(coordinate: MarkerLocation.coordinate, tint: .orange), name: "\(MarkerLocation.coordinate)")])
+                    // update the messages array with the fetched records
+                    // if the size of messages is not equal to the size of records, then we need to update the messages array
+                    if self.messages.count != records.count {
+                        self.messages = records.compactMap {
+                            MockMessages.ChatMessageItem.init(
+                                user: MockMessages.ChatUserItem.init(userName: $0["userID"] as? String ?? "(Unable to load)"),
+                                messageKind: ChatMessageKind.text($0["text"] as? String ?? "(Unable to load)"),
+                                isSender: ($0["userID"] as? String ?? "(Unable to load)") == self.userID,
+                                date: $0["timestamp"] as? Date ?? Date()
+                            )
+                        }
+                        markers.removeAll()
+                        for record in records {
+                            let MarkerLocation = record["location"] as? CLLocation ?? CLLocation()
+                            markers.append(contentsOf: [Marker(location: MapMarker(coordinate: MarkerLocation.coordinate, tint: .orange), name: "\(MarkerLocation.coordinate)")])
+                        }
+                        self.messages = self.messages.sorted { $0.date < $1.date }
                     }
-                    self.messages = self.messages.sorted { $0.date < $1.date }
+                    // sort the records by date
                 }
-                // sort the records by date
             }
         }
     }
@@ -81,6 +85,7 @@ struct ContentView: View {
                 print(error.localizedDescription)
             } else {
                 print("Record saved successfully")
+                fetchItems()
             }
         }
     }
@@ -108,7 +113,7 @@ struct ContentView: View {
             ZStack {
                 // Colored background
                 Color.gray.edgesIgnoringSafeArea(.all)
-                Text("Showing posts within \(Int(radiusInKilometers))km of you")
+                Text("Showing posts within \(Int(radiusInMeters / 1000))km of you")
                 .foregroundColor(Color.white)
                 .font(.headline)
                 .scaledToFit()
@@ -117,19 +122,11 @@ struct ContentView: View {
             .frame(height: UIScreen.main.bounds.height / 25)
             chatView
         }
-        .onChange(of: locationManager.lastLocation) { _ in
-            if !hasLoaded {
-                // load posts on startup if they haven't been loaded already.
-                hasLoaded = true
-                fetchItems()
-                // run every 10 seconds
-                Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { _ in
-                    fetchItems()
-                }
-            }
-        }
         .onAppear {
-            // Create a unique user id and store in UserDefaults
+            fetchItems()
+            Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { _ in
+                fetchItems()
+            }
             userID = UserDefaults.standard.string(forKey: "userId") ?? ""
             if userID == "" {
                 let userId = UUID().uuidString
