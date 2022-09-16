@@ -144,6 +144,7 @@ struct ContentView: View {
             isEditing: $isEditing,
             placeholder: "Type something",
             onCommit: { messageKind in
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                 self.messages.append(
                     .init(user: MockMessages.sender, messageKind: messageKind, isSender: true)
                 )
@@ -215,15 +216,15 @@ struct ContentView: View {
 //        }
 //    }
 }
-extension MKCoordinateRegion{
-    ///Identify the length of the span in meters north to south
-    var spanLatitude: Measurement<UnitLength>{
-        let loc1 = CLLocation(latitude: center.latitude - span.latitudeDelta * 0.5, longitude: center.longitude)
-        let loc2 = CLLocation(latitude: center.latitude + span.latitudeDelta * 0.5, longitude: center.longitude)
-        let metersInLatitude = loc1.distance(from: loc2)
-        return Measurement(value: metersInLatitude, unit: UnitLength.meters)
-    }
-}
+//extension MKCoordinateRegion{
+//    ///Identify the length of the span in meters north to south
+//    var spanLatitude: Measurement<UnitLength>{
+//        let loc1 = CLLocation(latitude: center.latitude - span.latitudeDelta * 0.5, longitude: center.longitude)
+//        let loc2 = CLLocation(latitude: center.latitude + span.latitudeDelta * 0.5, longitude: center.longitude)
+//        let metersInLatitude = loc1.distance(from: loc2)
+//        return Measurement(value: metersInLatitude, unit: UnitLength.meters)
+//    }
+//}
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
